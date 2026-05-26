@@ -1,0 +1,293 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "companyName",
+              "value": "={{ $json.companyName }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "industry",
+              "value": "={{ $json.industry }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "logoDescription",
+              "value": "={{ $json.logoDescription }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "logoStyle",
+              "value": "={{ $json.logoStyle }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "fullPrompt",
+              "value": "={{ `Create a professional logo for ${$json.companyName}, a ${$json.industry} company. Style: ${$json.logoStyle}. ${$json.logoDescription}. The logo should be clean, memorable, and suitable for business use. High quality, vector-style design.` }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "32d3cf76-f0be-4bb7-af0f-b1a3f9351d00",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1056,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1lyV2MUHp7qBndkuuAWGDuRf1zPoeVOkzZUinrFJOcLc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1lyV2MUHp7qBndkuuAWGDuRf1zPoeVOkzZUinrFJOcLc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "companyName": "={{ $('Workflow Configuration').item.json.companyName }}",
+            "industry": "={{ $('Workflow Configuration').item.json.industry }}",
+            "logoDescription": "={{ $('Workflow Configuration').item.json.logoDescription }}",
+            "logoStyle": "={{ $('Workflow Configuration').item.json.logoStyle }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "companyName",
+              "displayName": "companyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "logoDescription",
+              "displayName": "logoDescription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "logoStyle",
+              "displayName": "logoStyle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "93a3cbd9-2769-4f39-95ca-00e6be7b5b53",
+      "name": "Store Form Responses",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -832,
+        1120
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0jeBg3ZHPAAqdxKf",
+          "name": "Google Sheets account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Company Logo Generator",
+        "formDescription": "Enter your company details to generate a custom logo",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "companyName",
+              "fieldLabel": "Company Name",
+              "requiredField": true
+            },
+            {
+              "fieldName": "industry",
+              "fieldLabel": "Industry/Business Type",
+              "requiredField": true
+            },
+            {
+              "fieldName": "logoDescription",
+              "fieldLabel": "Logo Description (colors, style, elements you want)",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldName": "logoStyle",
+              "fieldLabel": "Logo Style",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Modern"
+                  },
+                  {
+                    "option": "Minimalist"
+                  },
+                  {
+                    "option": "Vintage"
+                  },
+                  {
+                    "option": "Playful"
+                  },
+                  {
+                    "option": "Professional"
+                  },
+                  {
+                    "option": "Abstract"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "2fd23100-583f-476d-8fde-4f775939987a",
+      "name": "Company Details Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -1280,
+        1024
+      ],
+      "webhookId": "ef39f440-b05f-4f28-8068-e9900acf1bbb"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Your Logo is Ready!",
+        "completionMessage": "={{ 'Thank you for using our logo generator! Your custom logo for ' + $('Workflow Configuration').item.json.companyName + ' has been created and saved.' }}",
+        "options": {
+          "formTitle": "Your Logo is Ready!"
+        }
+      },
+      "id": "e174deb5-80aa-4741-9db3-c3f8ada48ad6",
+      "name": "Show Logo Result",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.4,
+      "position": [
+        -608,
+        928
+      ],
+      "webhookId": "4652ebc4-8c87-40cc-85cd-119d57d3612c"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "={{ $('Workflow Configuration').item.json.fullPrompt }}",
+        "options": {
+          "dalleQuality": "standard",
+          "size": "1024x1024",
+          "style": "vivid"
+        }
+      },
+      "id": "ddf2d4ba-01ab-4ef2-a53c-baabe88c8216",
+      "name": "Generate Logo with DALL-E 3",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -832,
+        928
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "KFs40ojw6H99ip7E",
+          "name": "OpenAi account 9"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Store Form Responses",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Logo with DALL-E 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Company Details Form": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Logo with DALL-E 3": {
+      "main": [
+        [
+          {
+            "node": "Show Logo Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e24b9b79132b1ac0f47b841530328c43ef564195676e3e884204bda93a885d9"
+  }
+}
