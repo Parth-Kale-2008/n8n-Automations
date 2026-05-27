@@ -1,0 +1,338 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Resume AI Detection Scanner",
+        "formDescription": "Upload your resume for advanced AI detection analysis. We check word patterns, formatting, grammar consistency, and linguistic markers to identify AI-generated content.",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "resume",
+              "fieldLabel": "Upload Resume",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf,.doc,.docx,.txt",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "9c2796ce-e77e-495b-8b14-21bcc0f56f53",
+      "name": "Resume Upload Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -5264,
+        1024
+      ],
+      "webhookId": "4cca4bf2-06df-4be3-907a-08785e775e1c"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume",
+        "options": {
+          "joinPages": true,
+          "keepSource": "json"
+        }
+      },
+      "id": "34a429ba-c698-4faf-9659-74970fcbce58",
+      "name": "Extract Resume Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -5040,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"isAIGenerated\": {\n\t\t\t\"type\": \"boolean\",\n\t\t\t\"description\": \"Whether the resume appears to be AI-generated\"\n\t\t},\n\t\t\"confidenceScore\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"minimum\": 0,\n\t\t\t\"maximum\": 100,\n\t\t\t\"description\": \"Confidence score between 0-100\"\n\t\t},\n\t\t\"indicators\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"description\": \"List of indicators found in the resume\"\n\t\t},\n\t\t\"reasoning\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"Explanation of the detection reasoning\"\n\t\t},\n\t\t\"recommendation\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"Recommendation based on the analysis\"\n\t\t},\n\t\t\"wordPatternScore\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"minimum\": 0,\n\t\t\t\"maximum\": 100,\n\t\t\t\"description\": \"Score indicating word pattern analysis\"\n\t\t},\n\t\t\"grammarConsistencyScore\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"minimum\": 0,\n\t\t\t\"maximum\": 100,\n\t\t\t\"description\": \"Score indicating grammar consistency\"\n\t\t},\n\t\t\"formattingAnalysis\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"Analysis of document formatting patterns\"\n\t\t},\n\t\t\"linguisticMarkers\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"description\": \"List of linguistic markers detected\"\n\t\t},\n\t\t\"sentenceComplexityVariance\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"description\": \"Variance in sentence complexity throughout the document\"\n\t\t}\n\t},\n\t\"required\": [\"isAIGenerated\", \"confidenceScore\", \"indicators\", \"reasoning\", \"recommendation\"]\n}"
+      },
+      "id": "58718266-a35a-4c79-854d-ad0438b21f6e",
+      "name": "Structure Detection Result",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -4688,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "e7ed24ea-8042-47ac-8820-96bc5d4a79f2",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -4816,
+        1296
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "hHy6shPcpRcZAPEK",
+          "name": "OpenAi account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Perform a comprehensive AI detection analysis on this resume text:\n\n{{ $json.text }}\n\nConduct deep analysis across these dimensions:\n\n1. WORD PATTERN ANALYSIS: Examine vocabulary diversity, repetition patterns, and AI-typical word choices\n2. GRAMMAR CONSISTENCY: Analyze grammar perfection vs natural human variation, punctuation patterns\n3. FORMATTING STRUCTURE: Evaluate formatting consistency and template-like patterns\n4. LINGUISTIC MARKERS: Identify AI-specific phrases, transition words, passive voice usage\n5. SENTENCE COMPLEXITY VARIANCE: Measure variation in sentence length and structure\n6. SEMANTIC AUTHENTICITY: Check for specific vs generic content, concrete metrics vs vague claims\n7. CONTEXTUAL COHERENCE: Assess personal voice, career narrative authenticity, industry knowledge\n\nProvide detailed analysis with specific examples from the text, confidence scores for each dimension, and an overall assessment.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert AI content detector specializing in resume analysis. Perform deep linguistic analysis to detect AI-generated resumes by examining: 1) WORD PATTERNS: Analyze vocabulary diversity, word frequency distributions, and unusual word choices typical of AI models. 2) GRAMMAR & SYNTAX: Check for perfect grammar with no natural human errors, overly consistent sentence structures, and mechanical punctuation patterns. 3) FORMATTING CONSISTENCY: Detect unnaturally perfect formatting, consistent spacing patterns, and template-like structures. 4) LINGUISTIC MARKERS: Identify AI-specific phrases, transitional word overuse, passive voice patterns, and lack of colloquialisms. 5) SENTENCE COMPLEXITY: Measure variance in sentence length and complexity - AI tends to produce more uniform patterns. 6) SEMANTIC COHERENCE: Check for generic statements, vague accomplishments, buzzword density without substance, and missing personal narrative voice. 7) CONTEXTUAL AUTHENTICITY: Look for specific details, genuine metrics, industry-specific terminology used correctly, and authentic career progression. Be thorough and analytical, providing specific examples from the text to support your findings."
+        }
+      },
+      "id": "21689d7d-abf9-43ba-9c1c-5a763ff889db",
+      "name": "AI Resume Detector",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -4752,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.combined_isAIGenerated }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1b3784d6-a10e-4b5b-bdf4-c7da5163b0d4",
+      "name": "Route by Combined Detection",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4240,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "AI Detection Result: AI-Generated Content Detected",
+        "completionMessage": "Our analysis indicates this resume was likely generated by AI. See detailed findings below.",
+        "options": {
+          "formTitle": "AI Detection Result: AI-Generated Content Detected"
+        }
+      },
+      "id": "167421be-8d8c-40ba-a1df-b9a4d43df04c",
+      "name": "Show AI-Generated Result",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.4,
+      "position": [
+        -4016,
+        832
+      ],
+      "webhookId": "75a5cdc1-17bd-4583-8c5d-ff86a5abf892"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "AI Detection Result: Legitimate Human-Written Content",
+        "completionMessage": "Our analysis indicates this resume appears to be human-written. See detailed findings below.",
+        "options": {
+          "formTitle": "AI Detection Result: Legitimate Human-Written Content"
+        }
+      },
+      "id": "29d515e9-d0ad-4577-acdb-9f7781b61c1f",
+      "name": "Show Legitimate Result",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.4,
+      "position": [
+        -4016,
+        1024
+      ],
+      "webhookId": "115dbd1c-fc96-49d3-b36e-556c2572458f"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "QesmCY28q12P7rMI",
+          "mode": "list",
+          "cachedResultName": "resume_analysis_results",
+          "cachedResultUrl": "/projects/uDsik7rTmoPS8SL3/datatables/QesmCY28q12P7rMI"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "isAiGenerated": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "isAiGenerated",
+              "displayName": "isAiGenerated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "confidenceScore",
+              "displayName": "confidenceScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reasoning",
+              "displayName": "reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recommendation",
+              "displayName": "recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "622a4519-a214-4f27-b000-59ddab9c17cd",
+      "name": "Store Combined Analysis",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -4240,
+        1120
+      ]
+    }
+  ],
+  "connections": {
+    "Resume Upload Form": {
+      "main": [
+        [
+          {
+            "node": "Extract Resume Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Resume Text": {
+      "main": [
+        [
+          {
+            "node": "AI Resume Detector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Detection Result": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Resume Detector",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Resume Detector",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Resume Detector": {
+      "main": [
+        [
+          {
+            "node": "Route by Combined Detection",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Store Combined Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Combined Detection": {
+      "main": [
+        [
+          {
+            "node": "Show AI-Generated Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Show Legitimate Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "3e24b9b79132b1ac0f47b841530328c43ef564195676e3e884204bda93a885d9"
+  }
+}
